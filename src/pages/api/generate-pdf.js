@@ -1,5 +1,6 @@
 // pages/api/generate-pdf.js
-import puppeteer from "puppeteer";
+import chromium from "chrome-aws-lambda";
+import puppeteer from "puppeteer-core";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end("Only POST allowed");
@@ -52,8 +53,10 @@ export default async function handler(req, res) {
   `;
 
   const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: chromium.headless,
   });
 
   const page = await browser.newPage();
