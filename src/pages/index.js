@@ -88,8 +88,10 @@ export default function Home() {
           const pdfUrl = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = pdfUrl;
-          a.download = "pro-roast-report.pdf";
+          a.download = "pro-roast-report.md";
+          document.body.appendChild(a);
           a.click();
+          a.remove();
 
           alert("✅ PDF downloaded successfully!");
         } catch (error) {
