@@ -1,5 +1,5 @@
 // pages/examples.js
-import { roastExamples } from "../pages/data/examples";
+import { roastExamples } from "../data/examples";
 
 export default function ExamplesPage() {
   return (

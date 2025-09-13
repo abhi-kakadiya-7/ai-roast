@@ -198,7 +198,7 @@ export default function Home() {
               style={{
                 fontSize: "2.5rem",
                 fontWeight: "bold",
-                color: "#b91c1c",
+                color: "#1DA1F2",
               }}
             >
               {stats.shares}

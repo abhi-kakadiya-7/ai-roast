@@ -136,7 +136,7 @@ Excerpt: ${bodyText}
         parsedJson = JSON.parse(match[0]);
 
         try {
-          const clientPromise = require("../lib/mongodb").default;
+          const clientPromise = require("../../lib/mongodb").default;
 
           const client = await clientPromise;
           const db = client.db("airoast");

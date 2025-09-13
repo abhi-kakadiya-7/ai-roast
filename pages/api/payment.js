@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       payment_capture: 1,
     });
 
-    const clientPromise = require("../lib/mongodb").default;
+    const clientPromise = require("../../lib/mongodb").default;
     const client = await clientPromise;
     const db = client.db("airoast");
     await db.collection("payments").insertOne({
