@@ -149,7 +149,7 @@ Excerpt: ${bodyText}
     try {
       content = await callGroq("llama-3.3-70b-versatile");
     } catch (err) {
-      if (err.response?.status === 429) {
+      if (err.response?.data?.error?.code === "rate_limit_exceeded") {
         console.warn("Rate limit hit, retrying with groq/compound-mini");
         content = await callGroq("groq/compound-mini");
       } else {
