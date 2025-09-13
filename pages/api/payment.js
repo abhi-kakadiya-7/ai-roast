@@ -1,6 +1,5 @@
 // pages/api/payment.js
 import Razorpay from "razorpay";
-import clientPromise from "../lib/mongodb";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -22,6 +21,7 @@ export default async function handler(req, res) {
       payment_capture: 1,
     });
 
+    const clientPromise = require("../lib/mongodb").default;
     const client = await clientPromise;
     const db = client.db("airoast");
     await db.collection("payments").insertOne({

@@ -1,7 +1,6 @@
-import clientPromise from "../lib/mongodb";
-
 export default async function handler(req, res) {
   try {
+    const clientPromise = require("../lib/mongodb").default;
     const client = await clientPromise;
     const db = client.db("airoast");
 

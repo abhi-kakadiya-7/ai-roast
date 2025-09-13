@@ -1,4 +1,3 @@
-import clientPromise from "../lib/mongodb";
 import crypto from "crypto";
 
 export default async function handler(req, res) {
@@ -6,6 +5,7 @@ export default async function handler(req, res) {
 
   const { event_type, url } = req.body || {};
   try {
+    const clientPromise = require("../lib/mongodb").default;
     const client = await clientPromise;
     const db = client.db("airoast");
 

@@ -1,7 +1,6 @@
 // pages/api/roast.js
 import * as cheerio from "cheerio";
 import axios from "axios";
-import clientPromise from "../lib/mongodb";
 
 function isPrivateIPv4(ip) {
   const parts = ip.split(".").map(Number);
@@ -137,6 +136,8 @@ Excerpt: ${bodyText}
         parsedJson = JSON.parse(match[0]);
 
         try {
+          const clientPromise = require("../lib/mongodb").default;
+
           const client = await clientPromise;
           const db = client.db("airoast");
           await db.collection("roasts").insertOne({
