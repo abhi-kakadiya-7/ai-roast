@@ -5,15 +5,23 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [roast, setRoast] = useState(null);
   const [advice, setAdvice] = useState(null);
+  const [jokes, setJokes] = useState(null);
   const [error, setError] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    // Load Razorpay script on mount
+    // Load Razorpay script
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
+
+    // Fetch analytics
+    fetch("/api/dashboard")
+      .then((r) => r.json())
+      .then(setStats)
+      .catch((e) => console.error("Dashboard fetch failed", e));
   }, []);
 
   async function handleSubmit(e) {
@@ -32,6 +40,7 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "Unknown error");
       setRoast(data.roast || data.roastRaw || "No roast returned.");
       setAdvice(data.advice || []);
+      setJokes(data?.jokes || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -47,6 +56,16 @@ export default function Home() {
     const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       tweet
     )}`;
+
+    fetch("/api/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_type: "share_twitter",
+        url,
+      }),
+    }).catch((err) => console.error("Analytics error:", err));
+
     window.open(intent, "_blank");
   }
 
@@ -127,6 +146,69 @@ export default function Home() {
       <p>
         Paste your site URL. The AI will roast it and give 3 friendly fixes.
       </p>
+      <p style={{ marginTop: 20 }}>
+        Want to see what it looks like?{" "}
+        <a href="/examples">See roast examples</a>
+      </p>
+
+      {stats && (
+        <div
+          style={{
+            marginTop: 30,
+            display: "flex",
+            justifyContent: "space-around",
+            background: "#eef2ff",
+            borderRadius: 12,
+            padding: "2rem 1rem",
+            textAlign: "center",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: "2.5rem",
+                fontWeight: "bold",
+                color: "#1e3a8a",
+              }}
+            >
+              {stats.roasts}
+            </div>
+            <div style={{ fontSize: "0.9rem", color: "#374151" }}>
+              Total Roasts
+            </div>
+          </div>
+
+          <div>
+            <div
+              style={{
+                fontSize: "2.5rem",
+                fontWeight: "bold",
+                color: "#047857",
+              }}
+            >
+              {stats.payments}
+            </div>
+            <div style={{ fontSize: "0.9rem", color: "#374151" }}>
+              Pro Reports Sold
+            </div>
+          </div>
+
+          <div>
+            <div
+              style={{
+                fontSize: "2.5rem",
+                fontWeight: "bold",
+                color: "#b91c1c",
+              }}
+            >
+              {stats.shares}
+            </div>
+            <div style={{ fontSize: "0.9rem", color: "#374151" }}>
+              Twitter Shares
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
         <input
@@ -160,6 +242,17 @@ export default function Home() {
           <h3>Roast</h3>
           <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.4 }}>{roast}</div>
 
+          {jokes && jokes.length > 0 && (
+            <>
+              <h4 style={{ marginTop: 12 }}>Some Jokes:</h4>
+              <ol>
+                {jokes.map((a, i) => (
+                  <li key={i}>{a}</li>
+                ))}
+              </ol>
+            </>
+          )}
+
           {advice && advice.length > 0 && (
             <>
               <h4 style={{ marginTop: 12 }}>Friendly fixes</h4>
@@ -189,7 +282,7 @@ export default function Home() {
       )}
       {pdfLoading && (
         <div style={{ marginTop: 16, fontStyle: "italic" }}>
-          🧠 Generating your Pro Roast PDF... please wait...
+          🧠 Generating your Pro Roast Report... please wait...
         </div>
       )}
     </main>

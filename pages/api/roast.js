@@ -1,6 +1,7 @@
 // pages/api/roast.js
 import * as cheerio from "cheerio";
 import axios from "axios";
+import clientPromise from "../lib/mongodb";
 
 function isPrivateIPv4(ip) {
   const parts = ip.split(".").map(Number);
@@ -134,6 +135,21 @@ Excerpt: ${bodyText}
       const match = content.match(/\{[\s\S]*\}/);
       if (match) {
         parsedJson = JSON.parse(match[0]);
+
+        try {
+          const client = await clientPromise;
+          const db = client.db("airoast");
+          await db.collection("roasts").insertOne({
+            url,
+            roast: parsedJson?.roast || content,
+            advice: parsedJson?.advice || [],
+            jokes: parsedJson?.jokes || [],
+            upgrade: !!upgrade,
+            createdAt: new Date(),
+          });
+        } catch (e) {
+          console.error("DB insert failed:", e);
+        }
       } else {
         throw new Error("No JSON object found");
       }
@@ -147,6 +163,7 @@ Excerpt: ${bodyText}
     return res.status(200).json({
       roast: parsedJson.roast,
       advice: parsedJson.advice,
+      jokes: parsedJson?.jokes,
     });
   } catch (err) {
     console.error("Groq API error:", err.response?.data || err.message);
