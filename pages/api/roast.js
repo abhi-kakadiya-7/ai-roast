@@ -45,9 +45,24 @@ export default async function handler(req, res) {
       headers: { "User-Agent": "AI-Roast-Bot/1.0" },
     });
     if (!resp.ok) {
-      return res
-        .status(400)
-        .json({ error: `Failed to fetch URL, status ${resp.status}` });
+      const funErrors = [
+        "Seems like this website ghosted us. No roast today! 👻",
+        "The site didn’t pick up our call… must be socially awkward. 📵",
+        "We knocked, but nobody answered. Maybe it’s hiding from roasts. 🕵️",
+        "That site pulled the classic Irish goodbye — gone without a trace. 🚪💨",
+        "It’s giving us the cold shoulder. Must’ve heard about our savage burns. ❄️🔥",
+        "This website is playing hard to get… no roast for now. 💅",
+        "We tried to fetch it, but the site rage-quit on us. 🎮💥",
+        "Looks like the site went stealth mode. Can’t roast what we can’t see. 🕶️",
+        "The server just left us on read… savage. 📩❌",
+        "This site flinched before the roast even began. 🐔🔥",
+        "We poked it with a stick, but nothing happened. 🚶‍♂️🌾",
+      ];
+      const msg = funErrors[Math.floor(Math.random() * funErrors.length)];
+
+      return res.status(400).json({
+        error: msg,
+      });
     }
     html = await resp.text();
   } catch (e) {
@@ -110,11 +125,11 @@ Excerpt: ${bodyText}
   const maxTokens = upgrade ? 1000 : 512;
   const temperature = upgrade ? 0.9 : 0.7;
 
-  try {
+  const callGroq = async (model) => {
     const groqRes = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
       {
-        model: "llama-3.3-70b-versatile",
+        model,
         messages: [{ role: "user", content: prompt }],
         temperature,
         max_completion_tokens: maxTokens,
@@ -126,8 +141,21 @@ Excerpt: ${bodyText}
         },
       }
     );
+    return groqRes.data.choices[0].message.content;
+  };
 
-    const content = groqRes.data.choices[0].message.content;
+  try {
+    let content;
+    try {
+      content = await callGroq("llama-3.3-70b-versatile");
+    } catch (err) {
+      if (err.response?.status === 429) {
+        console.warn("Rate limit hit, retrying with groq/compound-mini");
+        content = await callGroq("groq/compound-mini");
+      } else {
+        throw err;
+      }
+    }
 
     let parsedJson = null;
     try {
